@@ -11,24 +11,20 @@ GAIN = 0.5
 
 COORDINATES = [-1.2516592741012573, -2.3094260692596436, 0.13866472244262695]
 
-def toFixed(f: float, n=0):
-    a, b = str(f).split('.')
-    return float('{}.{}{}'.format(a, b[:n], '0'*(n-len(b))))
-
 # Function to get robot to spicified coordinates
 def getToSpecificCoordinate(coords, left_motor_handle, right_motor_handle):
   errorCode, robot_handle = sim.simxGetObjectHandle(clientID, 'Pioneer_p3dx_visible', sim.simx_opmode_oneshot_wait)
   errorCode, current_coords = sim.simxGetObjectPosition(clientID, robot_handle, -1, sim.simx_opmode_oneshot_wait)
-  destination = [toFixed(coords[0], 2), toFixed(coords[1], 2), toFixed(coords[2], 2)]
+  destination = [round(coords[0], 2), round(coords[1], 2), round(coords[2], 2)]
 
   # print(orient)
   rotate = True
   while rotate:
-    angle = toFixed(math.atan2(destination[1] - toFixed(current_coords[0], 2), destination[0] - toFixed(current_coords[0], 2)), 1)
+    angle = round(math.atan2(destination[1] - round(current_coords[1], 1), destination[0] - round(current_coords[0], 2)), 1)
     errorCode, orient = sim.simxGetObjectOrientation(clientID, robot_handle, -1, sim.simx_opmode_oneshot_wait)
     print('Angle:', angle)
-    print('Orient:', toFixed(orient[2], 1))
-    if angle != toFixed(orient[2], 1):
+    print('Orient:', round(orient[2], 1))
+    if angle != round(orient[2], 1):
       velocity_left = 1
       velocity_right = -1
     else:
@@ -39,8 +35,8 @@ def getToSpecificCoordinate(coords, left_motor_handle, right_motor_handle):
     errorCode = sim.simxSetJointTargetVelocity(clientID, right_motor_handle, velocity_right, sim.simx_opmode_streaming)
     time.sleep(0.05)
   print(current_coords)
-  print('Robot X:', toFixed(current_coords[0], 2))
-  print('Robot Y:', toFixed(current_coords[1], 2))
+  print('Robot X:', round(current_coords[0], 2))
+  print('Robot Y:', round(current_coords[1], 2))
   print('')
   print('Destintion X:', destination[0])
   print('Destintion Y:', destination[1])
@@ -50,13 +46,13 @@ def getToSpecificCoordinate(coords, left_motor_handle, right_motor_handle):
   arrived = False
   while not arrived:
     errorCode, current_coords = sim.simxGetObjectPosition(clientID, robot_handle, -1, sim.simx_opmode_streaming)
-    print('Current coordinates:', toFixed(current_coords[0], 2), toFixed(current_coords[1], 2), toFixed(current_coords[2], 2))
-    print('Destination:', destination[0], destination[1], toFixed(coords[2], 2))
+    print('Current coordinates:', round(current_coords[0], 2), round(current_coords[1], 2), round(current_coords[2], 2))
+    print('Destination:', destination[0], destination[1], round(coords[2], 2))
     print('')
 
     # velocity_left = VELOCITY + GAIN * steer
     # velocity_right = VELOCITY - GAIN * steer
-    if destination[0] != toFixed(current_coords[0], 2):
+    if destination[0] != round(current_coords[0], 2):
       velocity_left = 1
       velocity_right = 1
     else:
