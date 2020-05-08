@@ -9,49 +9,44 @@ MINIMUM_DISTANCE = 0.3
 VELOCITY = 1
 GAIN = 0.5
 
-COORDINATES = [-1.2516592741012573, -2.3094260692596436, 0.13866472244262695]
+ROTATION_VELOCITY = 0.2
+
+EULER_ANGLES_RANGE = [-3.14, 3.14]
+
+COORDINATES = [1.7516592741012573, -5.5094260692596436, 0.13866472244262695]
 
 # Function to get robot to spicified coordinates
 def getToSpecificCoordinate(coords, left_motor_handle, right_motor_handle):
   errorCode, robot_handle = sim.simxGetObjectHandle(clientID, 'Pioneer_p3dx_visible', sim.simx_opmode_oneshot_wait)
   errorCode, current_coords = sim.simxGetObjectPosition(clientID, robot_handle, -1, sim.simx_opmode_oneshot_wait)
   destination = [round(coords[0], 2), round(coords[1], 2), round(coords[2], 2)]
+  errorCode, orient = sim.simxGetObjectOrientation(clientID, robot_handle, -1, sim.simx_opmode_oneshot_wait)
+  rotate_direction = min(EULER_ANGLES_RANGE, key=lambda rotate_direction:abs(rotate_direction-orient[2]))
 
-  # print(orient)
   rotate = True
   while rotate:
-    angle = round(math.atan2(destination[1] - round(current_coords[1], 1), destination[0] - round(current_coords[0], 2)), 1)
-    errorCode, orient = sim.simxGetObjectOrientation(clientID, robot_handle, -1, sim.simx_opmode_oneshot_wait)
-    print('Angle:', angle)
-    print('Orient:', round(orient[2], 1))
-    if angle != round(orient[2], 1):
-      velocity_left = 1
-      velocity_right = -1
+    angle = round(math.atan2(destination[1] - current_coords[1], destination[0] - current_coords[0]), 2)
+    errorCode, orient = sim.simxGetObjectOrientation(clientID, robot_handle, -1, sim.simx_opmode_streaming)
+
+    if angle != round(orient[2], 2):
+      if rotate_direction > 0:
+        velocity_left = -ROTATION_VELOCITY
+        velocity_right = ROTATION_VELOCITY
+      else:
+        velocity_left = ROTATION_VELOCITY
+        velocity_right = -ROTATION_VELOCITY
     else:
       velocity_left = 0
       velocity_right = 0
       rotate = False
     errorCode = sim.simxSetJointTargetVelocity(clientID, left_motor_handle, velocity_left, sim.simx_opmode_streaming)
     errorCode = sim.simxSetJointTargetVelocity(clientID, right_motor_handle, velocity_right, sim.simx_opmode_streaming)
-    time.sleep(0.05)
-  print(current_coords)
-  print('Robot X:', round(current_coords[0], 2))
-  print('Robot Y:', round(current_coords[1], 2))
-  print('')
-  print('Destintion X:', destination[0])
-  print('Destintion Y:', destination[1])
-  print('')
-  # print('Angle: ', angle)
+    time.sleep(0.0001)
 
   arrived = False
   while not arrived:
     errorCode, current_coords = sim.simxGetObjectPosition(clientID, robot_handle, -1, sim.simx_opmode_streaming)
-    print('Current coordinates:', round(current_coords[0], 2), round(current_coords[1], 2), round(current_coords[2], 2))
-    print('Destination:', destination[0], destination[1], round(coords[2], 2))
-    print('')
 
-    # velocity_left = VELOCITY + GAIN * steer
-    # velocity_right = VELOCITY - GAIN * steer
     if destination[0] != round(current_coords[0], 2):
       velocity_left = 1
       velocity_right = 1
