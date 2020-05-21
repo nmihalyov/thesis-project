@@ -1,11 +1,11 @@
 from Bug import *
 
 class Destination(Bug):
-  def __init__(self, target_name, bot_name, wheel_speed=1.0):
-    Bug.__init__(self, target_name, bot_name, wheel_speed)
+  def __init__(self, target_name, ROBOT_NAME, ROBOT_SPEED):
+    Bug.__init__(self, target_name, ROBOT_NAME, ROBOT_SPEED)
     self.min_dist_to_target = None
 
-    self.print_about_info()
+    self.print_info()
 
   def loop(self):
 
@@ -47,11 +47,11 @@ class Destination(Bug):
     angle = Utils.angle_between_vectors(self.bot_dir, self.target_pos.minus(self.bot_pos))
 
     if math.fabs(angle) > 1.0 * self.PI / 180.0:
-      vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.WHEEL_SPEED + angle, vrep.simx_opmode_streaming)
-      vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.WHEEL_SPEED - angle, vrep.simx_opmode_streaming)
+      vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.ROBOT_SPEED + angle, vrep.simx_opmode_streaming)
+      vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.ROBOT_SPEED - angle, vrep.simx_opmode_streaming)
     else:
-      vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.WHEEL_SPEED, vrep.simx_opmode_streaming)
-      vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.WHEEL_SPEED, vrep.simx_opmode_streaming)
+      vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.ROBOT_SPEED, vrep.simx_opmode_streaming)
+      vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.ROBOT_SPEED, vrep.simx_opmode_streaming)
 
   def action_rotating(self):
 
@@ -86,10 +86,10 @@ class Destination(Bug):
 
     u_obstacle_dist_stab = self.obstacle_dist_stab_PID.output(obstacle_dist)
     u_obstacle_follower = self.obstacle_follower_PID.output(delta)
+  
+    vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.ROBOT_SPEED + u_obstacle_follower + u_obstacle_dist_stab - (1 - self.detect[4]), vrep.simx_opmode_streaming)
+    vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.ROBOT_SPEED - u_obstacle_follower - u_obstacle_dist_stab + (1 - self.detect[4]), vrep.simx_opmode_streaming)
 
-    vrep.simxSetJointTargetVelocity(self.client_id, self.left_motor_handle,  self.WHEEL_SPEED + u_obstacle_follower + u_obstacle_dist_stab - (1 - self.detect[4]), vrep.simx_opmode_streaming)
-    vrep.simxSetJointTargetVelocity(self.client_id, self.right_motor_handle, self.WHEEL_SPEED - u_obstacle_follower - u_obstacle_dist_stab + (1 - self.detect[4]), vrep.simx_opmode_streaming)
-
-bug = Destination(target_name='Destination', bot_name='P3DX', wheel_speed=1)
+bug = Destination(target_name='Destination', ROBOT_NAME='P3DX', ROBOT_SPEED=1)
 
 bug.loop()
