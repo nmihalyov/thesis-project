@@ -1,20 +1,22 @@
 class PIDController:
   def __init__(self, frequency):
     self.frequency = frequency
-    self.k_p = 0.0
-    self.k_i = 0.0
-    self.k_d = 0.0
-    self.e_prev = 0.0
-    self.sum_err = 0.0
+    self.k_p = 0
+    self.k_i = 0
+    self.k_d = 0
+    self.e_prev = 0
+    self.sum_err = 0
     self.max_sum_err = 3.4028234664e+38
-    self.p = 0.0
-    self.i = 0.0
-    self.d = 0.0
+    self.p = 0
+    self.i = 0
+    self.d = 0
+
 
   def set_coefficients(self, k_p, k_i, k_d ):
     self.k_p = k_p
     self.k_i = k_i / self.frequency
     self.k_d = k_d * self.frequency
+
 
   def output(self, current_err):
     self.sum_err += current_err
