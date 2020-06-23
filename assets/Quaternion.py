@@ -36,8 +36,8 @@ class Quaternion:
     res = Quaternion()
     n = self.norm()
     res.w = self.w / n
-    res.x = - self.x / n
-    res.y = - self.y / n
+    res.x = -self.x / n
+    res.y = -self.y / n
     res.z = -self.z / n
     return res
 
